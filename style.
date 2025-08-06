@@ -1,0 +1,425 @@
+/* --- CSS Variables --- */
+:root {
+    --primary-bg: #121212;
+    --secondary-bg: #1E1E1E;
+    --card-bg: #282828;
+    --primary-text: #FFFFFF;
+    --secondary-text: #B3B3B3;
+    --accent-color: #00BFFF; /* DeepSkyBlue */
+    --font-family: 'Poppins', sans-serif;
+    --container-width: 1200px;
+    --border-radius: 8px;
+}
+
+/* --- General Resets & Body --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--primary-bg);
+    color: var(--primary-text);
+    line-height: 1.6;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- Header & Navigation --- */
+.site-header {
+    background-color: rgba(30, 30, 30, 0.8);
+    padding: 1rem 0;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo a {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-text);
+}
+
+.main-nav ul {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: var(--secondary-text);
+    font-weight: 500;
+    transition: color 0.3s ease;
+    position: relative;
+    padding-bottom: 5px;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--primary-text);
+}
+
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--accent-color);
+}
+
+/* --- Search Form --- */
+.search-form {
+    display: flex;
+}
+
+#search-input {
+    background-color: var(--secondary-bg);
+    border: 1px solid #333;
+    color: var(--primary-text);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+    outline: none;
+    transition: border-color 0.3s ease;
+    width: 250px;
+}
+
+#search-input:focus {
+    border-color: var(--accent-color);
+}
+
+.search-form button {
+    background-color: var(--accent-color);
+    border: none;
+    color: var(--primary-text);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.search-form button:hover {
+    background-color: #009acd;
+}
+
+/* --- Mobile Menu --- */
+#mobile-menu-toggle {
+    display: none;
+    font-size: 2rem;
+    background: none;
+    border: none;
+    color: var(--primary-text);
+    cursor: pointer;
+}
+
+/* --- Main Content --- */
+main {
+    padding-top: 100px; /* Adjust for fixed header height */
+}
+
+.content-section {
+    padding: 2rem 0;
+}
+
+#content-title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--accent-color);
+    padding-left: 1rem;
+}
+
+/* --- Dynamic Options (Genres, etc.) --- */
+#dynamic-options-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 2rem;
+}
+
+.option-btn {
+    background-color: var(--secondary-bg);
+    color: var(--secondary-text);
+    border: 1px solid #333;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.option-btn:hover,
+.option-btn.active {
+    background-color: var(--accent-color);
+    color: var(--primary-text);
+    border-color: var(--accent-color);
+}
+
+/* --- Movie Grid --- */
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.movie-card {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+.movie-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.movie-card img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.movie-card-info {
+    padding: 1rem;
+}
+
+.movie-card-info h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- Loader --- */
+.loader {
+    border: 5px solid var(--secondary-bg);
+    border-top: 5px solid var(--accent-color);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+    display: none; /* Initially hidden */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* --- Movie Details Modal --- */
+.modal {
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: var(--secondary-bg);
+    margin: auto;
+    padding: 30px;
+    border: 1px solid #333;
+    width: 90%;
+    max-width: 800px;
+    border-radius: var(--border-radius);
+    position: relative;
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.close-button {
+    color: var(--secondary-text);
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: var(--primary-text);
+}
+
+#movie-details-content {
+    display: flex;
+    gap: 30px;
+}
+
+.details-poster img {
+    width: 250px;
+    border-radius: var(--border-radius);
+}
+
+.details-info h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--accent-color);
+}
+
+.details-info p {
+    margin-bottom: 1rem;
+    color: var(--secondary-text);
+}
+
+.details-meta {
+    margin-bottom: 1rem;
+}
+
+.details-meta span {
+    margin-right: 15px;
+    background-color: var(--card-bg);
+    padding: 5px 10px;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+}
+
+.details-info h3 {
+    font-size: 1.2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 5px;
+    display: inline-block;
+}
+
+#movie-cast {
+    list-style: none;
+    color: var(--secondary-text);
+}
+
+/* --- Footer --- */
+.site-footer {
+    background-color: var(--secondary-bg);
+    text-align: center;
+    padding: 1.5rem 0;
+    margin-top: 2rem;
+    border-top: 1px solid #2a2a2a;
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 992px) {
+    .main-nav, .search-form {
+        display: none;
+    }
+    #mobile-menu-toggle {
+        display: block;
+    }
+    .header-content {
+        justify-content: space-between;
+    }
+    .main-nav {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: var(--secondary-bg);
+        padding: 1rem 0;
+    }
+    .main-nav.active {
+        display: flex;
+    }
+    .main-nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    .movie-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+    #movie-details-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .details-poster img {
+        width: 200px;
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .header-content {
+        flex-wrap: wrap;
+    }
+    .logo {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    .search-form {
+        width: 100%;
+        margin-top: 1rem;
+        display: flex; /* Ensure it's visible on mobile when not part of the main nav */
+    }
+    #search-input {
+        width: 100%;
+    }
+    .movie-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    .movie-card img {
+        height: 220px;
+    }
+    .modal-content {
+        padding: 20px;
+        width: 95%;
+    }
+    .details-info h2 {
+        font-size: 1.8rem;
+    }
+}
