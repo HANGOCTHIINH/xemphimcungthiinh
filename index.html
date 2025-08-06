@@ -119,7 +119,9 @@
         .main-nav {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
+            flex-grow: 1;
+            justify-content: center;
         }
 
         .nav-item {
@@ -466,9 +468,12 @@
         }
 
         /* --- Responsive Design --- */
-        @media (max-width: 992px) {
+        @media (max-width: 1100px) {
             .header-content {
                 flex-direction: column;
+            }
+            .main-nav {
+                 margin-top: 15px;
             }
         }
         
@@ -512,7 +517,7 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             .logo-link span {
-                font-size: 1.4rem;
+                display: none;
             }
             .nav-item {
                 flex-grow: 1;
@@ -538,15 +543,15 @@
             <nav class="main-nav">
                 <div class="nav-item">
                     <span class="nav-link">Thể loại</span>
-                    <div class="dropdown-menu" id="genre-menu">
-                        <!-- Thể loại sẽ được chèn bởi JS -->
-                    </div>
+                    <div class="dropdown-menu" id="genre-menu"></div>
                 </div>
                 <div class="nav-item">
                     <span class="nav-link">Quốc gia</span>
-                    <div class="dropdown-menu" id="country-menu">
-                        <!-- Quốc gia sẽ được chèn bởi JS -->
-                    </div>
+                    <div class="dropdown-menu" id="country-menu"></div>
+                </div>
+                <div class="nav-item">
+                    <span class="nav-link">Năm</span>
+                    <div class="dropdown-menu" id="year-menu"></div>
                 </div>
             </nav>
             <form id="search-form">
@@ -560,10 +565,8 @@
         <!-- Trang chủ: Phim mới cập nhật -->
         <section id="home-section">
             <div class="container">
-                <h2 class="section-title">Phim Mới Cập Nhật</h2>
-                <div class="movie-grid" id="new-movies-grid">
-                    <!-- Phim mới sẽ được chèn bởi JS -->
-                </div>
+                <h2 class="section-title">Phim Đề Cử</h2>
+                <div class="movie-grid" id="new-movies-grid"></div>
             </div>
         </section>
 
@@ -571,25 +574,17 @@
         <section id="list-section" class="hidden">
             <div class="container">
                 <h2 class="section-title" id="list-title">Kết quả</h2>
-                <div class="movie-grid" id="list-movies-grid">
-                    <!-- Kết quả lọc/tìm kiếm sẽ được chèn bởi JS -->
-                </div>
+                <div class="movie-grid" id="list-movies-grid"></div>
             </div>
         </section>
 
         <!-- Trang chi tiết phim -->
         <section id="detail-section" class="hidden">
              <div class="container">
-                <div class="detail-poster" id="detail-poster">
-                    <!-- Poster phim chi tiết -->
-                </div>
-                <div class="detail-info" id="detail-info">
-                    <!-- Thông tin phim chi tiết -->
-                </div>
+                <div class="detail-poster" id="detail-poster"></div>
+                <div class="detail-info" id="detail-info"></div>
             </div>
-            <div id="player-section">
-                <!-- Trình phát phim sẽ được chèn vào đây -->
-            </div>
+            <div id="player-section"></div>
         </section>
         
     </main>
@@ -602,7 +597,7 @@
 
     <footer class="main-footer">
         <div class="container">
-            <p>&copy; 2025 Xem phim cùng Thiinh. Dữ liệu được cung cấp bởi phimapi.com.</p>
+            <p>&copy; 2025 Xem phim cùng Thiinh. Dữ liệu được cung cấp bởi ophim1.com.</p>
         </div>
     </footer>
 
@@ -610,7 +605,7 @@
         document.addEventListener('DOMContentLoaded', () => {
 
             // --- Khai báo biến ---
-            const API_DOMAIN = 'https://phimapi.com';
+            const API_DOMAIN = 'https://ophim1.com/v1/api';
 
             // DOM Elements
             const homeSection = document.getElementById('home-section');
@@ -625,6 +620,7 @@
 
             const genreMenu = document.getElementById('genre-menu');
             const countryMenu = document.getElementById('country-menu');
+            const yearMenu = document.getElementById('year-menu');
 
             const searchForm = document.getElementById('search-form');
             const searchInput = document.getElementById('search-input');
@@ -681,9 +677,14 @@
                     movieCard.className = 'movie-card';
                     movieCard.dataset.slug = movie.slug;
                     
+                    // API ophim1.com cung cấp ảnh qua domain khác
+                    const posterUrl = movie.poster_url.startsWith('http') 
+                        ? movie.poster_url 
+                        : `https://img.ophim1.com/uploads/movies/${movie.poster_url}`;
+
                     movieCard.innerHTML = `
                         <div class="movie-card-poster-wrapper">
-                            <img src="${movie.poster_url}" alt="${movie.name}" class="movie-card-poster" onerror="this.onerror=null;this.src='https://placehold.co/200x300/181818/E5E5E5?text=No+Image';">
+                            <img src="${posterUrl}" alt="${movie.name}" class="movie-card-poster" onerror="this.onerror=null;this.src='https://placehold.co/200x300/181818/E5E5E5?text=No+Image';">
                         </div>
                         <div class="movie-card-info">
                             <h3 class="movie-card-name">${movie.name}</h3>
@@ -698,7 +699,11 @@
                 const detailPoster = document.getElementById('detail-poster');
                 const detailInfo = document.getElementById('detail-info');
                 
-                detailPoster.innerHTML = `<img src="${movie.poster_url}" alt="${movie.name}" onerror="this.onerror=null;this.src='https://placehold.co/300x450/181818/E5E5E5?text=No+Image';">`;
+                const posterUrl = movie.poster_url.startsWith('http') 
+                        ? movie.poster_url 
+                        : `https://img.ophim1.com/uploads/movies/${movie.poster_url}`;
+                
+                detailPoster.innerHTML = `<img src="${posterUrl}" alt="${movie.name}" onerror="this.onerror=null;this.src='https://placehold.co/300x450/181818/E5E5E5?text=No+Image';">`;
                 
                 detailInfo.innerHTML = `
                     <h2>${movie.name}</h2>
@@ -715,15 +720,15 @@
                         </div>
                         <div class="info-item">
                             <strong>Diễn viên</strong>
-                            <span>${movie.actor.join(', ')}</span>
+                            <span>${(movie.actor || []).join(', ')}</span>
                         </div>
                         <div class="info-item">
                             <strong>Thể loại</strong>
-                            <span>${movie.category.map(c => c.name).join(', ')}</span>
+                            <span>${(movie.category || []).map(c => c.name).join(', ')}</span>
                         </div>
                          <div class="info-item">
                             <strong>Quốc gia</strong>
-                            <span>${movie.country.map(c => c.name).join(', ')}</span>
+                            <span>${(movie.country || []).map(c => c.name).join(', ')}</span>
                         </div>
                     </div>
                 `;
@@ -735,10 +740,9 @@
                 const playerSection = document.getElementById('player-section');
                 playerSection.innerHTML = '';
                 
-                if (!movie.episodes || movie.episodes.length === 0) return;
+                if (!movie.episodes || movie.episodes.length === 0 || !movie.episodes[0].server_data) return;
 
-                const firstServer = movie.episodes[0];
-                if (!firstServer || !firstServer.server_data || firstServer.server_data.length === 0) return;
+                const serverData = movie.episodes[0].server_data;
 
                 const playerContainer = document.createElement('div');
                 playerContainer.className = 'container';
@@ -754,7 +758,7 @@
                 const episodeButtons = document.createElement('div');
                 episodeButtons.className = 'episode-buttons';
 
-                firstServer.server_data.forEach((episode, index) => {
+                serverData.forEach((episode) => {
                     const btn = document.createElement('button');
                     btn.className = 'episode-btn';
                     btn.textContent = episode.name;
@@ -783,42 +787,35 @@
                     const link = document.createElement('a');
                     link.href = '#';
                     link.textContent = item.name;
-                    link.dataset.slug = item.slug;
+                    // API năm trả về item là string, không phải object
+                    const slug = (typeof item === 'object') ? item.slug : item;
+                    const name = (typeof item === 'object') ? item.name : item;
+                    link.dataset.slug = slug;
                     link.dataset.type = type;
-                    link.dataset.name = item.name;
+                    link.dataset.name = name;
                     container.appendChild(link);
                 });
             }
             
             // --- Hàm xử lý chính ---
 
-            async function loadNewMovies() {
-                toggleLoader(true);
-                const data = await fetchData('/danh-sach/phim-moi-cap-nhat');
-                toggleLoader(false);
-                if (data && data.items) {
-                    renderMovies(data.items, newMoviesGrid);
-                    showSection('home-section');
-                }
-            }
-
             async function loadMovieDetails(slug) {
                 toggleLoader(true);
-                const data = await fetchData(`/phim/${slug}`);
+                const response = await fetchData(`/phim/${slug}`);
                 toggleLoader(false);
-                if (data && data.movie) {
-                    renderMovieDetails(data.movie);
+                if (response && response.data && response.data.item) {
+                    renderMovieDetails(response.data.item);
                     showSection('detail-section');
                 }
             }
             
             async function handleSearch(keyword) {
                  toggleLoader(true);
-                 const data = await fetchData(`/v1/api/tim-kiem?keyword=${encodeURIComponent(keyword)}`);
+                 const response = await fetchData(`/tim-kiem?keyword=${encodeURIComponent(keyword)}`);
                  toggleLoader(false);
-                 if (data && data.data) {
+                 if (response && response.data && response.data.items) {
                      listTitle.textContent = `Kết quả tìm kiếm cho "${keyword}"`;
-                     renderMovies(data.data.items, listMoviesGrid);
+                     renderMovies(response.data.items, listMoviesGrid);
                      showSection('list-section');
                  }
             }
@@ -827,16 +824,18 @@
                 toggleLoader(true);
                 let endpoint = '';
                 if (type === 'genre') {
-                    endpoint = `/v1/api/the-loai/${slug}`;
+                    endpoint = `/the-loai/${slug}`;
                 } else if (type === 'country') {
-                    endpoint = `/v1/api/quoc-gia/${slug}`;
+                    endpoint = `/quoc-gia/${slug}`;
+                } else if (type === 'year') {
+                    endpoint = `/nam-phat-hanh/${slug}`;
                 }
                 
-                const data = await fetchData(endpoint);
+                const response = await fetchData(endpoint);
                 toggleLoader(false);
-                if (data && data.data) {
+                if (response && response.data && response.data.items) {
                     listTitle.textContent = `${name}`;
-                    renderMovies(data.data.items, listMoviesGrid);
+                    renderMovies(response.data.items, listMoviesGrid);
                     showSection('list-section');
                 }
             }
@@ -874,20 +873,29 @@
             // --- Hàm khởi tạo ---
             async function init() {
                 toggleLoader(true);
-                const [genresData, countriesData, newMoviesData] = await Promise.all([
+                const [genresData, countriesData, yearsData, homeData] = await Promise.all([
                     fetchData('/the-loai'),
                     fetchData('/quoc-gia'),
-                    fetchData('/danh-sach/phim-moi-cap-nhat')
+                    fetchData('/nam-phat-hanh'),
+                    fetchData('/home')
                 ]);
 
-                if (genresData) {
-                    renderFilters(genresData, genreMenu, 'genre');
+                if (genresData && genresData.data) {
+                    renderFilters(genresData.data.items, genreMenu, 'genre');
                 }
-                if (countriesData) {
-                    renderFilters(countriesData, countryMenu, 'country');
+                if (countriesData && countriesData.data) {
+                    renderFilters(countriesData.data.items, countryMenu, 'country');
                 }
-                if (newMoviesData && newMoviesData.items) {
-                    renderMovies(newMoviesData.items, newMoviesGrid);
+                if (yearsData && yearsData.data) {
+                    renderFilters(yearsData.data.items, yearMenu, 'year');
+                }
+
+                if (homeData && homeData.data && homeData.data.items) {
+                    // Gộp tất cả phim từ các danh mục trên trang chủ
+                    const allHomeMovies = homeData.data.items.reduce((acc, category) => {
+                        return acc.concat(category.items);
+                    }, []);
+                    renderMovies(allHomeMovies, newMoviesGrid);
                 }
                 
                 toggleLoader(false);
