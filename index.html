@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xem phim cùng Thiinh</title>
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header class="site-header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo"><a href="index.html">Xem phim cùng Thiinh</a></h1>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="#" id="home-link" class="nav-link active">Trang chủ</a></li>
+                        <li><a href="#" id="genre-link" class="nav-link">Thể loại</a></li>
+                        <li><a href="#" id="country-link" class="nav-link">Quốc gia</a></li>
+                        <li><a href="#" id="year-link" class="nav-link">Năm</a></li>
+                    </ul>
+                </nav>
+                <form id="search-form" class="search-form">
+                    <input type="search" id="search-input" placeholder="Tìm kiếm phim..." required>
+                    <button type="submit">Tìm</button>
+                </form>
+                <button id="mobile-menu-toggle" aria-label="Open menu">☰</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- This section is optional but good for a featured movie -->
+        <section id="hero-section" style="display: none;">
+            <!-- Content will be populated by JS -->
+        </section>
+
+        <!-- Dynamic Content Section -->
+        <section id="content-section" class="content-section">
+            <div class="container">
+                <h2 id="content-title">Phim Phổ Biến</h2>
+                <div id="dynamic-options-container">
+                    <!-- Genre/Country/Year buttons will be injected here -->
+                </div>
+                <div id="loader" class="loader"></div>
+                <div id="movie-grid" class="movie-grid">
+                    <!-- Movie posters will be populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Movie Details Modal -->
+        <div id="movie-details-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <div id="movie-details-content">
+                    <!-- Movie details will be populated by JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2024 Xem phim cùng Thiinh. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
