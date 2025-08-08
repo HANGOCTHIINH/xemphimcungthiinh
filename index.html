@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xem phim cùng Thiinh - Giao diện mới</title>
+    <title>Xem phim cùng Thiinh - Hoàn Chỉnh</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -26,6 +26,10 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
@@ -435,11 +439,11 @@
             display: inline-block;
         }
 
-        .episodes-list {
+        .episodes-list, .gemini-features {
             margin-top: 1.5rem;
         }
 
-        .episodes-list h3 {
+        .episodes-list h3, .gemini-features h3 {
             margin-bottom: 1rem;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 0.5rem;
@@ -469,6 +473,64 @@
             border-color: var(--accent-color);
             transform: translateY(-2px);
         }
+        
+        /* Gemini Features */
+        .gemini-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(45deg, var(--accent-color), #c39eff);
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        .gemini-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(158, 120, 240, 0.4);
+        }
+        .gemini-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .gemini-output {
+            background-color: var(--primary-bg-color);
+            border-radius: 8px;
+            padding: 1rem;
+            color: var(--text-secondary-color);
+            min-height: 50px;
+            line-height: 1.7;
+        }
+        
+        .gemini-output .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-left-color: var(--accent-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        .similar-movie-item {
+            background-color: var(--primary-bg-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .similar-movie-item strong {
+            color: var(--accent-color);
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
 
         /* --- Loader --- */
         .loader {
@@ -594,7 +656,7 @@
     <!-- Movie Detail Modal -->
     <div id="movie-modal" class="modal-overlay">
         <div class="modal-content">
-            <span id="modal-close-btn" class="modal-close-btn">&times;</span>
+            <span id="modal-close-btn" class="modal-close-btn" aria-label="Đóng">&times;</span>
             <div class="modal-player-container">
                 <iframe id="movie-player" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
@@ -654,6 +716,53 @@
                     return null;
                 }
             }
+            
+            /**
+             * Calls the Gemini API with exponential backoff.
+             * @param {object} payload - The payload to send to the API.
+             * @param {number} maxRetries - Maximum number of retries.
+             * @returns {Promise<object|null>} - The API response or null on failure.
+             */
+            async function callGeminiAPI(payload, maxRetries = 3) {
+                const apiKey = ""; // Canvas will provide this
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                
+                let attempt = 0;
+                while (attempt < maxRetries) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`API responded with status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        if (result.candidates && result.candidates.length > 0 &&
+                            result.candidates[0].content && result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0) {
+                            return result.candidates[0].content.parts[0];
+                        } else {
+                            // Handle cases where the API returns a valid response but no candidates (e.g., safety blocks)
+                            console.warn("Gemini API returned no candidates. Response:", result);
+                            return null;
+                        }
+                    } catch (error) {
+                        attempt++;
+                        if (attempt >= maxRetries) {
+                            console.error("Gemini API call failed after multiple retries:", error);
+                            return null;
+                        }
+                        const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+                return null;
+            }
+
 
             /**
              * Displays movies in the grid.
@@ -745,6 +854,7 @@
                 prevBtn.className = 'pagination-btn';
                 prevBtn.textContent = '«';
                 prevBtn.dataset.page = currentPage - 1;
+                prevBtn.setAttribute('aria-label', 'Trang trước');
                 if (currentPage === 1) prevBtn.disabled = true;
                 pages.push(prevBtn);
 
@@ -769,6 +879,7 @@
                     if (page === currentPage) pageBtn.classList.add('active');
                     pageBtn.textContent = page;
                     pageBtn.dataset.page = page;
+                    pageBtn.setAttribute('aria-label', `Đi đến trang ${page}`);
                     pages.push(pageBtn);
                     lastPage = page;
                 });
@@ -778,6 +889,7 @@
                 nextBtn.className = 'pagination-btn';
                 nextBtn.textContent = '»';
                 nextBtn.dataset.page = currentPage + 1;
+                nextBtn.setAttribute('aria-label', 'Trang sau');
                 if (currentPage === totalPages) nextBtn.disabled = true;
                 pages.push(nextBtn);
 
@@ -826,6 +938,7 @@
              * @returns {string} The constructed API URL.
              */
             function buildUrl(page = 1) {
+                const limit = 50; // Set the number of movies per page to 50
                 if (currentView === 'search') {
                     const keyword = searchInput.value.trim();
                     const category = categoryFilter.value;
@@ -837,16 +950,14 @@
                         country: country,
                         year: year,
                         page: page,
-                        limit: 24
+                        limit: limit
                     });
                     return `${API_SEARCH}?${params.toString()}`;
                 } else { // 'browse' view
-                    // The API has different structures for different lists
                     if (currentBrowseType === 'phim-moi-cap-nhat') {
-                        return `${API_BASE_URL}/danh-sach/${currentBrowseType}?page=${page}`;
+                        return `${API_BASE_URL}/danh-sach/${currentBrowseType}?page=${page}&limit=${limit}`;
                     } else {
-                        // Other types use a different path
-                        return `${API_BASE_URL}/v1/api/danh-sach/${currentBrowseType}?page=${page}`;
+                        return `${API_BASE_URL}/v1/api/danh-sach/${currentBrowseType}?page=${page}&limit=${limit}`;
                     }
                 }
             }
@@ -889,11 +1000,23 @@
                                 <p class="modal-meta-item"><strong>Thể loại:</strong> ${movie.category.map(c => c.name).join(', ')}</p>
                                 <p class="modal-meta-item"><strong>Quốc gia:</strong> ${movie.country.map(c => c.name).join(', ')}</p>
                             </div>
+                            
+                            <div class="gemini-features">
+                                <h3>✨ Phân Tích bởi AI</h3>
+                                <button id="gemini-summary-btn" class="gemini-btn">Tóm Tắt & Đánh Giá</button>
+                                <div id="gemini-summary-output" class="gemini-output"></div>
+                            </div>
+
                             <div class="episodes-list">
                                 <h3>Danh sách tập</h3>
                                 <div class="episode-buttons" id="episode-buttons">
                                     <!-- Episode buttons will be injected here -->
                                 </div>
+                            </div>
+                            
+                            <div class="gemini-features">
+                                <h3>✨ Có Thể Bạn Cũng Thích</h3>
+                                <div id="gemini-similar-output" class="gemini-output"></div>
                             </div>
                         </div>
                     `;
@@ -915,11 +1038,105 @@
                     } else {
                         episodeButtonsContainer.innerHTML = "<p>Chưa có tập phim nào.</p>";
                     }
+                    
+                    // Add event listener for the new Gemini button
+                    document.getElementById('gemini-summary-btn').addEventListener('click', () => handleGeminiSummaryClick(movie));
+                    
+                    // Automatically fetch similar movies
+                    fetchSimilarMovies(movie);
+
 
                 } else {
                     modalDetailsContainer.innerHTML = `<p class="loader">Không thể tải thông tin phim.</p>`;
                 }
             }
+            
+            /**
+             * Handles the click on the Gemini summary button.
+             * @param {object} movie - The movie object.
+             */
+            async function handleGeminiSummaryClick(movie) {
+                const summaryBtn = document.getElementById('gemini-summary-btn');
+                const outputDiv = document.getElementById('gemini-summary-output');
+
+                summaryBtn.disabled = true;
+                outputDiv.innerHTML = '<div class="spinner"></div>';
+
+                const prompt = `Hãy đóng vai một nhà phê bình phim. Viết một đoạn tóm tắt ngắn gọn (2-3 câu, không tiết lộ nội dung) và một đoạn đánh giá nhanh (2-3 câu) về bộ phim "${movie.name}" (${movie.year}). Mô tả phim: "${movie.content.replace(/<p>|<\/p>/g, "")}". Chỉ trả về phần tóm tắt và đánh giá, không thêm lời chào.`;
+                
+                const payload = {
+                    contents: [{ role: "user", parts: [{ text: prompt }] }]
+                };
+
+                const result = await callGeminiAPI(payload);
+
+                if (result && result.text) {
+                    outputDiv.innerHTML = result.text.replace(/\n/g, '<br>');
+                } else {
+                    outputDiv.textContent = "Không thể tạo tóm tắt vào lúc này. Vui lòng thử lại sau.";
+                }
+                summaryBtn.style.display = 'none'; // Hide button after use
+            }
+            
+            /**
+             * Fetches and displays similar movies using Gemini.
+             * @param {object} movie - The movie object.
+             */
+            async function fetchSimilarMovies(movie) {
+                const outputDiv = document.getElementById('gemini-similar-output');
+                outputDiv.innerHTML = '<div class="spinner"></div>';
+                
+                const genresString = movie.category.map(c => c.name).join(', ');
+                const prompt = `Dựa trên bộ phim "${movie.name}" (${movie.year}) thuộc thể loại ${genresString}, hãy đề xuất 3 bộ phim khác có phong cách hoặc nội dung tương tự. Với mỗi phim, hãy cung cấp tên phim và một câu giải thích ngắn gọn tại sao nó được đề xuất.`;
+
+                const payload = {
+                    contents: [{ role: "user", parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "recommendations": {
+                                    type: "ARRAY",
+                                    items: {
+                                        type: "OBJECT",
+                                        properties: {
+                                            "title": { "type": "STRING" },
+                                            "reason": { "type": "STRING" }
+                                        },
+                                        required: ["title", "reason"]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                const result = await callGeminiAPI(payload);
+
+                if (result && result.text) {
+                    try {
+                        const parsedJson = JSON.parse(result.text);
+                        if (parsedJson.recommendations && parsedJson.recommendations.length > 0) {
+                            outputDiv.innerHTML = '';
+                            parsedJson.recommendations.forEach(rec => {
+                                const item = document.createElement('div');
+                                item.className = 'similar-movie-item';
+                                item.innerHTML = `<strong>${rec.title}:</strong> ${rec.reason}`;
+                                outputDiv.appendChild(item);
+                            });
+                        } else {
+                             outputDiv.textContent = "Không tìm thấy gợi ý nào.";
+                        }
+                    } catch (e) {
+                        console.error("Error parsing Gemini JSON response:", e);
+                        outputDiv.textContent = "Không thể lấy gợi ý vào lúc này.";
+                    }
+                } else {
+                    outputDiv.textContent = "Không thể lấy gợi ý vào lúc này. Vui lòng thử lại sau.";
+                }
+            }
+
 
             // --- Event Listeners ---
             
@@ -967,7 +1184,7 @@
                 if (page && page !== currentPage) {
                     const url = buildUrl(page);
                     fetchAndDisplayMovies(url);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    window.scrollTo(0, 0);
                 }
             });
             
@@ -979,14 +1196,21 @@
             });
 
             function closeModal() {
-                modal.classList.remove('active');
-                document.body.style.overflow = 'auto';
-                moviePlayer.src = ''; // This stops video playback in an iframe
+                if(modal.classList.contains('active')) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                    moviePlayer.src = ''; // This stops video playback in an iframe
+                }
             }
 
             modalCloseBtn.addEventListener('click', closeModal);
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) closeModal();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
             });
             
             modalDetailsContainer.addEventListener('click', (e) => {
